@@ -4,7 +4,7 @@ Imports System.Configuration
 Public Class AppMonitor
 
     Public Const APP_NAME As String = "AppMonitor"
-    Const APP_VERSION As String = "v180908"
+    Const APP_VERSION As String = "v180914"
     Const APP_STATUS_STARTING As String = "Starting"
     Const APP_STATUS_RUNNING As String = "Running"
     Const APP_STATUS_STOPPING As String = "Stopping"
@@ -21,7 +21,9 @@ Public Class AppMonitor
 
     Dim gDBConn As SqlConnection
     Dim gCycleInterval As Integer
-    Dim gShutdownRequested As Boolean = False
+    Dim gSendText_CycleInterval As Integer 'create a KVP, with AppName as the key, for these two
+    Dim gRouteText_CycleInterval As Integer
+    Dim gAppStatus As String 'overall app status; across all monitored apps
 
 
     Function GetAppStatus(pAppName As String) As AppStatus
@@ -174,11 +176,28 @@ Public Class AppMonitor
             gCycleInterval = 10000
         End If
 
+        lCycleInterval = GetAppConfig("SendText", "Cycle_Interval", "10000")
+        If IsNumeric(lCycleInterval) Then
+            gSendText_CycleInterval = Val(lCycleInterval)
+        Else
+            gSendText_CycleInterval = 10000
+        End If
+
+        lCycleInterval = GetAppConfig("RouteText", "Cycle_Interval", "10000")
+        If IsNumeric(lCycleInterval) Then
+            gRouteText_CycleInterval = Val(lCycleInterval)
+        Else
+            gRouteText_CycleInterval = 10000
+        End If
+
     End Sub
+
 
     Private Sub AppMonitor_Load(sender As Object, e As EventArgs) Handles MyBase.Load
 
         Dim lError As Integer = 0
+
+        WindowState = FormWindowState.Minimized ' start minimized, only open on-demand
 
         lError = Startup()
 
@@ -204,9 +223,19 @@ Public Class AppMonitor
 
     Private Sub AppMonitor_FormClosing(sender As Object, e As FormClosingEventArgs) Handles MyBase.FormClosing
 
-        Shutdown()
+        Dim lShutdownRequest = DialogResult
+
+        lShutdownRequest = MessageBox.Show("Do you want to shutdown " + APP_NAME + "?", "Shutdown", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
+        If lShutdownRequest = Windows.Forms.DialogResult.Yes Then
+            Shutdown()
+            e.Cancel = False 'allow the form to be closed and the app will exit
+        Else
+            WindowState = FormWindowState.Minimized
+            e.Cancel = True 'stop the form from being closed and minimize it instead
+        End If
 
     End Sub
+
 
     Private Sub Tick(sender As Object, e As EventArgs) Handles cTimer.Tick
 
@@ -219,19 +248,28 @@ Public Class AppMonitor
 
         Dim lAppStatus As AppStatus
 
+        gAppStatus = APP_STATUS_RUNNING
+
         lAppStatus = GetAppStatus("SendText")
         cSendTextStatus.Text = lAppStatus.AppStatus
         cSendTextTimestamp.Text = lAppStatus.Timestamp
         cSendTextStatus.BackColor = GetStatusColor(lAppStatus.AppStatus).Background
         cSendTextStatus.ForeColor = GetStatusColor(lAppStatus.AppStatus).Foreground
+        If (lAppStatus.AppStatus = APP_STATUS_STARTING) And gAppStatus = APP_STATUS_RUNNING Then gAppStatus = APP_STATUS_STARTING
+        If lAppStatus.AppStatus = APP_STATUS_STOPPING Then gAppStatus = APP_STATUS_STOPPING
 
         lAppStatus = GetAppStatus("RouteText")
         cRouteTextStatus.Text = lAppStatus.AppStatus
         cRouteTextTimestamp.Text = lAppStatus.Timestamp
         cRouteTextStatus.BackColor = GetStatusColor(lAppStatus.AppStatus).Background
         cRouteTextStatus.ForeColor = GetStatusColor(lAppStatus.AppStatus).Foreground
+        If (lAppStatus.AppStatus = APP_STATUS_STARTING) And gAppStatus = APP_STATUS_RUNNING Then gAppStatus = APP_STATUS_STARTING
+        If lAppStatus.AppStatus = APP_STATUS_STOPPING Then gAppStatus = APP_STATUS_STOPPING
+
+        DisplayAppStatus()
 
     End Sub
+
 
     Function GetStatusColor(pAppStatus As String) As StatusColor
 
@@ -257,4 +295,27 @@ Public Class AppMonitor
         GetStatusColor = lStatusColor
 
     End Function
+
+
+    Private Sub NotifyIcon_DoubleClick(sender As Object, e As EventArgs) Handles NotifyIcon.DoubleClick
+
+        WindowState = FormWindowState.Normal
+
+    End Sub
+
+
+    Sub DisplayAppStatus()
+
+        Select Case gAppStatus
+            Case APP_STATUS_RUNNING
+                NotifyIcon.Icon = New Icon(Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream("AppMonitor.Green.ico"))
+            Case APP_STATUS_STARTING
+                NotifyIcon.Icon = New Icon(Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream("AppMonitor.Yellow.ico"))
+            Case APP_STATUS_STOPPING
+                NotifyIcon.Icon = New Icon(Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream("AppMonitor.Red.ico"))
+        End Select
+
+        NotifyIcon.Visible = True
+
+    End Sub
 End Class
