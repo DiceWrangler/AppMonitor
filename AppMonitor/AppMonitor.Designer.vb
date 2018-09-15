@@ -40,51 +40,54 @@ Partial Class AppMonitor
         Me.cSendTextElapsed = New System.Windows.Forms.TextBox()
         Me.cRouteTextElapsed = New System.Windows.Forms.TextBox()
         Me.Label6 = New System.Windows.Forms.Label()
+        Me.Label7 = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'Label1
         '
         Me.Label1.AutoSize = True
-        Me.Label1.Location = New System.Drawing.Point(72, 64)
+        Me.Label1.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label1.Location = New System.Drawing.Point(17, 47)
         Me.Label1.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(53, 13)
+        Me.Label1.Size = New System.Drawing.Size(61, 13)
         Me.Label1.TabIndex = 0
         Me.Label1.Text = "SendText"
         '
         'cSendTextStatus
         '
         Me.cSendTextStatus.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.cSendTextStatus.Location = New System.Drawing.Point(149, 64)
+        Me.cSendTextStatus.Location = New System.Drawing.Point(95, 44)
         Me.cSendTextStatus.Margin = New System.Windows.Forms.Padding(2)
         Me.cSendTextStatus.Name = "cSendTextStatus"
         Me.cSendTextStatus.ReadOnly = True
-        Me.cSendTextStatus.Size = New System.Drawing.Size(76, 19)
+        Me.cSendTextStatus.Size = New System.Drawing.Size(98, 19)
         Me.cSendTextStatus.TabIndex = 1
         '
         'Label2
         '
         Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(72, 119)
+        Me.Label2.Font = New System.Drawing.Font("Microsoft Sans Serif", 8.25!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
+        Me.Label2.Location = New System.Drawing.Point(14, 83)
         Me.Label2.Margin = New System.Windows.Forms.Padding(2, 0, 2, 0)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(57, 13)
+        Me.Label2.Size = New System.Drawing.Size(66, 13)
         Me.Label2.TabIndex = 2
         Me.Label2.Text = "RouteText"
         '
         'cRouteTextStatus
         '
         Me.cRouteTextStatus.Font = New System.Drawing.Font("Microsoft Sans Serif", 7.8!, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, CType(0, Byte))
-        Me.cRouteTextStatus.Location = New System.Drawing.Point(149, 115)
+        Me.cRouteTextStatus.Location = New System.Drawing.Point(95, 80)
         Me.cRouteTextStatus.Margin = New System.Windows.Forms.Padding(2)
         Me.cRouteTextStatus.Name = "cRouteTextStatus"
         Me.cRouteTextStatus.ReadOnly = True
-        Me.cRouteTextStatus.Size = New System.Drawing.Size(76, 19)
+        Me.cRouteTextStatus.Size = New System.Drawing.Size(98, 19)
         Me.cRouteTextStatus.TabIndex = 3
         '
         'cSendTextTimestamp
         '
-        Me.cSendTextTimestamp.Location = New System.Drawing.Point(430, 66)
+        Me.cSendTextTimestamp.Location = New System.Drawing.Point(364, 43)
         Me.cSendTextTimestamp.Margin = New System.Windows.Forms.Padding(2)
         Me.cSendTextTimestamp.Name = "cSendTextTimestamp"
         Me.cSendTextTimestamp.ReadOnly = True
@@ -93,7 +96,7 @@ Partial Class AppMonitor
         '
         'cRouteTextTimestamp
         '
-        Me.cRouteTextTimestamp.Location = New System.Drawing.Point(430, 115)
+        Me.cRouteTextTimestamp.Location = New System.Drawing.Point(364, 79)
         Me.cRouteTextTimestamp.Margin = New System.Windows.Forms.Padding(2)
         Me.cRouteTextTimestamp.Name = "cRouteTextTimestamp"
         Me.cRouteTextTimestamp.ReadOnly = True
@@ -111,7 +114,7 @@ Partial Class AppMonitor
         '
         'cSendTextLastStarted
         '
-        Me.cSendTextLastStarted.Location = New System.Drawing.Point(267, 66)
+        Me.cSendTextLastStarted.Location = New System.Drawing.Point(210, 43)
         Me.cSendTextLastStarted.Margin = New System.Windows.Forms.Padding(2)
         Me.cSendTextLastStarted.Name = "cSendTextLastStarted"
         Me.cSendTextLastStarted.ReadOnly = True
@@ -120,7 +123,7 @@ Partial Class AppMonitor
         '
         'cRouteTextLastStarted
         '
-        Me.cRouteTextLastStarted.Location = New System.Drawing.Point(267, 114)
+        Me.cRouteTextLastStarted.Location = New System.Drawing.Point(210, 79)
         Me.cRouteTextLastStarted.Margin = New System.Windows.Forms.Padding(2)
         Me.cRouteTextLastStarted.Name = "cRouteTextLastStarted"
         Me.cRouteTextLastStarted.ReadOnly = True
@@ -130,7 +133,7 @@ Partial Class AppMonitor
         'Label3
         '
         Me.Label3.AutoSize = True
-        Me.Label3.Location = New System.Drawing.Point(164, 33)
+        Me.Label3.Location = New System.Drawing.Point(126, 16)
         Me.Label3.Name = "Label3"
         Me.Label3.Size = New System.Drawing.Size(37, 13)
         Me.Label3.TabIndex = 8
@@ -139,7 +142,7 @@ Partial Class AppMonitor
         'Label4
         '
         Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(302, 33)
+        Me.Label4.Location = New System.Drawing.Point(246, 16)
         Me.Label4.Name = "Label4"
         Me.Label4.Size = New System.Drawing.Size(64, 13)
         Me.Label4.TabIndex = 9
@@ -148,7 +151,7 @@ Partial Class AppMonitor
         'Label5
         '
         Me.Label5.AutoSize = True
-        Me.Label5.Location = New System.Drawing.Point(470, 33)
+        Me.Label5.Location = New System.Drawing.Point(400, 16)
         Me.Label5.Name = "Label5"
         Me.Label5.Size = New System.Drawing.Size(65, 13)
         Me.Label5.TabIndex = 10
@@ -156,36 +159,46 @@ Partial Class AppMonitor
         '
         'cSendTextElapsed
         '
-        Me.cSendTextElapsed.Location = New System.Drawing.Point(589, 66)
+        Me.cSendTextElapsed.Location = New System.Drawing.Point(518, 43)
         Me.cSendTextElapsed.Margin = New System.Windows.Forms.Padding(2)
         Me.cSendTextElapsed.Name = "cSendTextElapsed"
         Me.cSendTextElapsed.ReadOnly = True
-        Me.cSendTextElapsed.Size = New System.Drawing.Size(95, 20)
+        Me.cSendTextElapsed.Size = New System.Drawing.Size(98, 20)
         Me.cSendTextElapsed.TabIndex = 11
         '
         'cRouteTextElapsed
         '
-        Me.cRouteTextElapsed.Location = New System.Drawing.Point(589, 115)
+        Me.cRouteTextElapsed.Location = New System.Drawing.Point(518, 79)
         Me.cRouteTextElapsed.Margin = New System.Windows.Forms.Padding(2)
         Me.cRouteTextElapsed.Name = "cRouteTextElapsed"
         Me.cRouteTextElapsed.ReadOnly = True
-        Me.cRouteTextElapsed.Size = New System.Drawing.Size(95, 20)
+        Me.cRouteTextElapsed.Size = New System.Drawing.Size(98, 20)
         Me.cRouteTextElapsed.TabIndex = 12
         '
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(603, 33)
+        Me.Label6.Location = New System.Drawing.Point(545, 16)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(45, 13)
         Me.Label6.TabIndex = 13
         Me.Label6.Text = "Elapsed"
         '
+        'Label7
+        '
+        Me.Label7.AutoSize = True
+        Me.Label7.Location = New System.Drawing.Point(34, 16)
+        Me.Label7.Name = "Label7"
+        Me.Label7.Size = New System.Drawing.Size(26, 13)
+        Me.Label7.TabIndex = 14
+        Me.Label7.Text = "App"
+        '
         'AppMonitor
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(728, 366)
+        Me.ClientSize = New System.Drawing.Size(635, 118)
+        Me.Controls.Add(Me.Label7)
         Me.Controls.Add(Me.Label6)
         Me.Controls.Add(Me.cRouteTextElapsed)
         Me.Controls.Add(Me.cSendTextElapsed)
@@ -224,4 +237,5 @@ Partial Class AppMonitor
     Friend WithEvents cSendTextElapsed As TextBox
     Friend WithEvents cRouteTextElapsed As TextBox
     Friend WithEvents Label6 As Label
+    Friend WithEvents Label7 As Label
 End Class

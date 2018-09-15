@@ -4,11 +4,12 @@ Imports System.Configuration
 Public Class AppMonitor
 
     Public Const APP_NAME As String = "AppMonitor"
-    Const APP_VERSION As String = "v180914"
+    Const APP_VERSION As String = "v180915"
     Const APP_STATUS_STARTING As String = "Starting"
     Const APP_STATUS_RUNNING As String = "Running"
     Const APP_STATUS_STOPPING As String = "Stopping"
     Const APP_STATUS_UNKNOWN As String = "Unknown"
+    Const APP_STATUS_OFFLINE As String = "Offline"
 
     Structure AppStatus
         Public AppStatus As String
@@ -177,6 +178,8 @@ Public Class AppMonitor
         Dim lCmd As New SqlCommand
         Dim lResults As String
 
+        lResults = DateTime.Now.ToLocalTime.ToString ' this should never be used but. . .
+
         Try
 
             lCmd = gDBConn.CreateCommand
@@ -185,11 +188,9 @@ Public Class AppMonitor
             lCmd.CommandType = CommandType.Text
 
             lResults = lCmd.ExecuteScalar
-            If IsNothing(lResults) Then lResults = DateTime.Now.ToLocalTime.ToString 'this should only fail if the database connection is not live
 
         Catch ex As Exception
             MessageBox.Show("GetDBTime: " & ex.ToString, "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning)
-            lResults = DateTime.Now.ToLocalTime.ToString ' If we encountered an error just use the client's current time
 
         Finally
 
@@ -235,7 +236,7 @@ Public Class AppMonitor
 
         Dim lError As Integer = 0
 
-        WindowState = FormWindowState.Minimized ' start minimized, only open on-demand
+        WindowState = FormWindowState.Minimized ' start minimized, only open on-request
 
         lError = Startup()
 
@@ -247,7 +248,7 @@ Public Class AppMonitor
         Else
 
             MessageBox.Show(APP_NAME & " is shutting down", "STOP", MessageBoxButtons.OK, MessageBoxIcon.Stop)
-            Shutdown()
+            Shutdown() ' try to shutdown gracefully
             Application.Exit()
 
         End If
@@ -270,7 +271,7 @@ Public Class AppMonitor
         lShutdownRequest = MessageBox.Show("Do you want to shutdown " + APP_NAME + "?", "Shutdown", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
         If lShutdownRequest = Windows.Forms.DialogResult.Yes Then
 
-            Shutdown()
+            Shutdown() ' shutdown gracefully before app self-terminates
             e.Cancel = False 'allow the form to be closed and the app will exit
 
         Else
@@ -300,46 +301,56 @@ Public Class AppMonitor
         lCurrentGlobalAppStatus = APP_STATUS_RUNNING
 
         lAppStatus = GetAppStatus("SendText", APP_STATUS_STARTING)
-        cSendTextLastStarted.Text = lAppStatus.Timestamp
+        cSendTextLastStarted.Text = lAppStatus.Timestamp ' display the time the app was last started
 
-        lAppStatus = GetAppStatus("SendText")
-        cSendTextStatus.Text = lAppStatus.AppStatus
+        lAppStatus = GetAppStatus("SendText") ' get the most recent status
         cSendTextTimestamp.Text = lAppStatus.Timestamp
+
+        lLastUpdate = Convert.ToDateTime(lAppStatus.Timestamp)
+        lElapsed = GetDBTime() - lLastUpdate ' always use database-time
+        cSendTextElapsed.Text = lElapsed.TotalSeconds.ToString
+
+        If (lAppStatus.AppStatus = APP_STATUS_RUNNING) And (lElapsed.TotalMilliseconds > (gSendText_CycleInterval * 2)) Then ' if running but the status is stale
+            lAppStatus.AppStatus = APP_STATUS_UNKNOWN
+        End If
+
+        cSendTextStatus.Text = lAppStatus.AppStatus
         cSendTextStatus.BackColor = GetStatusColor(lAppStatus.AppStatus).Background
         cSendTextStatus.ForeColor = GetStatusColor(lAppStatus.AppStatus).Foreground
+
+        ' Running > Unknown > Starting > Stopping
+        ' NOTE: Offline apps do not effect the global app status
+
+        If (lAppStatus.AppStatus = APP_STATUS_UNKNOWN) And lCurrentGlobalAppStatus = APP_STATUS_RUNNING Then lCurrentGlobalAppStatus = APP_STATUS_UNKNOWN
         If (lAppStatus.AppStatus = APP_STATUS_STARTING) And lCurrentGlobalAppStatus = APP_STATUS_RUNNING Then lCurrentGlobalAppStatus = APP_STATUS_STARTING
         If lAppStatus.AppStatus = APP_STATUS_STOPPING Then lCurrentGlobalAppStatus = APP_STATUS_STOPPING
 
-        lLastUpdate = Convert.ToDateTime(lAppStatus.Timestamp)
-        lElapsed = GetDBTime() - lLastUpdate
-        cSendTextElapsed.Text = lElapsed.TotalMilliseconds.ToString
-        If lElapsed.TotalMilliseconds > (gSendText_CycleInterval * 2) Then
-            lCurrentGlobalAppStatus = APP_STATUS_UNKNOWN
-            cSendTextStatus.Text = APP_STATUS_UNKNOWN
-            cSendTextStatus.BackColor = GetStatusColor(APP_STATUS_UNKNOWN).Background
-            cSendTextStatus.ForeColor = GetStatusColor(APP_STATUS_UNKNOWN).Foreground
-        End If
 
         lAppStatus = GetAppStatus("RouteText", APP_STATUS_STARTING)
-        cRouteTextLastStarted.Text = lAppStatus.Timestamp
+        cRouteTextLastStarted.Text = lAppStatus.Timestamp ' display the time the app was last started
 
-        lAppStatus = GetAppStatus("RouteText")
-        cRouteTextStatus.Text = lAppStatus.AppStatus
+        lAppStatus = GetAppStatus("RouteText") ' get the most recent status
         cRouteTextTimestamp.Text = lAppStatus.Timestamp
+
+        lLastUpdate = Convert.ToDateTime(lAppStatus.Timestamp)
+        lElapsed = GetDBTime() - lLastUpdate ' always use database-time
+        cRouteTextElapsed.Text = lElapsed.TotalSeconds.ToString
+
+        If (lAppStatus.AppStatus = APP_STATUS_RUNNING) And (lElapsed.TotalMilliseconds > (gRouteText_CycleInterval * 2)) Then ' if running but the status is stale
+            lAppStatus.AppStatus = APP_STATUS_UNKNOWN
+        End If
+
+        cRouteTextStatus.Text = lAppStatus.AppStatus
         cRouteTextStatus.BackColor = GetStatusColor(lAppStatus.AppStatus).Background
         cRouteTextStatus.ForeColor = GetStatusColor(lAppStatus.AppStatus).Foreground
+
+        ' Running > Unknown > Starting > Stopping
+        ' NOTE: Offline apps do not effect the global app status
+
+        If (lAppStatus.AppStatus = APP_STATUS_UNKNOWN) And lCurrentGlobalAppStatus = APP_STATUS_RUNNING Then lCurrentGlobalAppStatus = APP_STATUS_UNKNOWN
         If (lAppStatus.AppStatus = APP_STATUS_STARTING) And lCurrentGlobalAppStatus = APP_STATUS_RUNNING Then lCurrentGlobalAppStatus = APP_STATUS_STARTING
         If lAppStatus.AppStatus = APP_STATUS_STOPPING Then lCurrentGlobalAppStatus = APP_STATUS_STOPPING
 
-        lLastUpdate = Convert.ToDateTime(lAppStatus.Timestamp)
-        lElapsed = GetDBTime() - lLastUpdate
-        cRouteTextElapsed.Text = lElapsed.TotalMilliseconds.ToString
-        If lElapsed.TotalMilliseconds > (gRouteText_CycleInterval * 2) Then
-            lCurrentGlobalAppStatus = APP_STATUS_UNKNOWN
-            cRouteTextStatus.Text = APP_STATUS_UNKNOWN
-            cRouteTextStatus.BackColor = GetStatusColor(APP_STATUS_UNKNOWN).Background
-            cRouteTextStatus.ForeColor = GetStatusColor(APP_STATUS_UNKNOWN).Foreground
-        End If
 
         If lCurrentGlobalAppStatus <> gGlobalAppStatus Then
 
@@ -361,7 +372,7 @@ Public Class AppMonitor
                 Case APP_STATUS_RUNNING
                     .Background = Color.Lime
                     .Foreground = Color.Black
-                Case APP_STATUS_STARTING
+                Case APP_STATUS_STARTING, APP_STATUS_OFFLINE
                     .Background = Color.Yellow
                     .Foreground = Color.Black
                 Case APP_STATUS_STOPPING
@@ -386,6 +397,8 @@ Public Class AppMonitor
 
 
     Sub DisplayAppStatus()
+
+        ' NOTE: Offline apps do not effect the global app status
 
         Select Case gGlobalAppStatus
             Case APP_STATUS_RUNNING
