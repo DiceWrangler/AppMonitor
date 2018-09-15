@@ -63,6 +63,7 @@ Partial Class AppMonitor
         Me.cSendTextStatus.ReadOnly = True
         Me.cSendTextStatus.Size = New System.Drawing.Size(98, 19)
         Me.cSendTextStatus.TabIndex = 1
+        Me.cSendTextStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Label2
         '
@@ -84,6 +85,7 @@ Partial Class AppMonitor
         Me.cRouteTextStatus.ReadOnly = True
         Me.cRouteTextStatus.Size = New System.Drawing.Size(98, 19)
         Me.cRouteTextStatus.TabIndex = 3
+        Me.cRouteTextStatus.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'cSendTextTimestamp
         '
@@ -93,6 +95,7 @@ Partial Class AppMonitor
         Me.cSendTextTimestamp.ReadOnly = True
         Me.cSendTextTimestamp.Size = New System.Drawing.Size(136, 20)
         Me.cSendTextTimestamp.TabIndex = 4
+        Me.cSendTextTimestamp.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'cRouteTextTimestamp
         '
@@ -102,6 +105,7 @@ Partial Class AppMonitor
         Me.cRouteTextTimestamp.ReadOnly = True
         Me.cRouteTextTimestamp.Size = New System.Drawing.Size(136, 20)
         Me.cRouteTextTimestamp.TabIndex = 5
+        Me.cRouteTextTimestamp.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'cTimer
         '
@@ -120,6 +124,7 @@ Partial Class AppMonitor
         Me.cSendTextLastStarted.ReadOnly = True
         Me.cSendTextLastStarted.Size = New System.Drawing.Size(136, 20)
         Me.cSendTextLastStarted.TabIndex = 6
+        Me.cSendTextLastStarted.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'cRouteTextLastStarted
         '
@@ -129,6 +134,7 @@ Partial Class AppMonitor
         Me.cRouteTextLastStarted.ReadOnly = True
         Me.cRouteTextLastStarted.Size = New System.Drawing.Size(136, 20)
         Me.cRouteTextLastStarted.TabIndex = 7
+        Me.cRouteTextLastStarted.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Label3
         '
@@ -165,6 +171,7 @@ Partial Class AppMonitor
         Me.cSendTextElapsed.ReadOnly = True
         Me.cSendTextElapsed.Size = New System.Drawing.Size(98, 20)
         Me.cSendTextElapsed.TabIndex = 11
+        Me.cSendTextElapsed.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'cRouteTextElapsed
         '
@@ -174,6 +181,7 @@ Partial Class AppMonitor
         Me.cRouteTextElapsed.ReadOnly = True
         Me.cRouteTextElapsed.Size = New System.Drawing.Size(98, 20)
         Me.cRouteTextElapsed.TabIndex = 12
+        Me.cRouteTextElapsed.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
         '
         'Label6
         '
