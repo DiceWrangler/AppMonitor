@@ -150,6 +150,7 @@
     <EmbeddedResource Include="Resources\Green.ico" />
     <EmbeddedResource Include="Resources\Red.ico" />
     <EmbeddedResource Include="Resources\Yellow.ico" />
+    <EmbeddedResource Include="Resources\Unknown.ico" />
     <Content Include="Stoplight.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

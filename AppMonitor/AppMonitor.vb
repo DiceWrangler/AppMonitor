@@ -8,6 +8,7 @@ Public Class AppMonitor
     Const APP_STATUS_STARTING As String = "Starting"
     Const APP_STATUS_RUNNING As String = "Running"
     Const APP_STATUS_STOPPING As String = "Stopping"
+    Const APP_STATUS_UNKNOWN As String = "Unknown"
 
     Structure AppStatus
         Public AppStatus As String
@@ -23,10 +24,10 @@ Public Class AppMonitor
     Dim gCycleInterval As Integer
     Dim gSendText_CycleInterval As Integer 'create a KVP, with AppName as the key, for these two
     Dim gRouteText_CycleInterval As Integer
-    Dim gAppStatus As String 'overall app status; across all monitored apps
+    Dim gGlobalAppStatus As String = "" 'global  app status, across all monitored apps
 
 
-    Function GetAppStatus(pAppName As String) As AppStatus
+    Function GetAppStatus(pAppName As String, Optional pAppStatus As String = "") As AppStatus
 
         Dim lAppStatus As AppStatus
         Dim lCmd As New SqlCommand
@@ -43,6 +44,12 @@ Public Class AppMonitor
 
             lCmd.Parameters.Add("@AppName", SqlDbType.VarChar)
             lCmd.Parameters("@AppName").Value = pAppName
+
+            ' app status Is an optional parameter, if specified use it otherwise display most current status
+            If pAppStatus > "" Then
+                lCmd.Parameters.Add("@AppStatus", SqlDbType.VarChar)
+                lCmd.Parameters("@AppStatus").Value = pAppStatus
+            End If
 
             lReader = lCmd.ExecuteReader(CommandBehavior.SingleRow)
             lReader.Read()
@@ -165,6 +172,37 @@ Public Class AppMonitor
     End Function
 
 
+    Function GetDBTime() As DateTime
+
+        Dim lCmd As New SqlCommand
+        Dim lResults As String
+
+        Try
+
+            lCmd = gDBConn.CreateCommand
+
+            lCmd.CommandText = "select GETDATE()"
+            lCmd.CommandType = CommandType.Text
+
+            lResults = lCmd.ExecuteScalar
+            If IsNothing(lResults) Then lResults = DateTime.Now.ToLocalTime.ToString 'this should only fail if the database connection is not live
+
+        Catch ex As Exception
+            MessageBox.Show("GetDBTime: " & ex.ToString, "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            lResults = DateTime.Now.ToLocalTime.ToString ' If we encountered an error just use the client's current time
+
+        Finally
+
+            lCmd.Dispose()
+            lCmd = Nothing
+
+        End Try
+
+        GetDBTime = Convert.ToDateTime(lResults)
+
+    End Function
+
+
     Sub LoadAppConfigs()
 
         Dim lCycleInterval As String
@@ -202,12 +240,16 @@ Public Class AppMonitor
         lError = Startup()
 
         If lError = 0 Then
+
             LoadAppConfigs() ' Subroutine just uses defaults if it fails for whatever reason
             cTimer.Interval = gCycleInterval
+
         Else
+
             MessageBox.Show(APP_NAME & " is shutting down", "STOP", MessageBoxButtons.OK, MessageBoxIcon.Stop)
             Shutdown()
             Application.Exit()
+
         End If
 
     End Sub
@@ -227,11 +269,15 @@ Public Class AppMonitor
 
         lShutdownRequest = MessageBox.Show("Do you want to shutdown " + APP_NAME + "?", "Shutdown", MessageBoxButtons.YesNo, MessageBoxIcon.Question)
         If lShutdownRequest = Windows.Forms.DialogResult.Yes Then
+
             Shutdown()
             e.Cancel = False 'allow the form to be closed and the app will exit
+
         Else
+
             WindowState = FormWindowState.Minimized
             e.Cancel = True 'stop the form from being closed and minimize it instead
+
         End If
 
     End Sub
@@ -246,27 +292,62 @@ Public Class AppMonitor
 
     Sub Main_Loop()
 
+        Dim lCurrentGlobalAppStatus As String
         Dim lAppStatus As AppStatus
+        Dim lLastUpdate As DateTime
+        Dim lElapsed As TimeSpan
 
-        gAppStatus = APP_STATUS_RUNNING
+        lCurrentGlobalAppStatus = APP_STATUS_RUNNING
+
+        lAppStatus = GetAppStatus("SendText", APP_STATUS_STARTING)
+        cSendTextLastStarted.Text = lAppStatus.Timestamp
 
         lAppStatus = GetAppStatus("SendText")
         cSendTextStatus.Text = lAppStatus.AppStatus
         cSendTextTimestamp.Text = lAppStatus.Timestamp
         cSendTextStatus.BackColor = GetStatusColor(lAppStatus.AppStatus).Background
         cSendTextStatus.ForeColor = GetStatusColor(lAppStatus.AppStatus).Foreground
-        If (lAppStatus.AppStatus = APP_STATUS_STARTING) And gAppStatus = APP_STATUS_RUNNING Then gAppStatus = APP_STATUS_STARTING
-        If lAppStatus.AppStatus = APP_STATUS_STOPPING Then gAppStatus = APP_STATUS_STOPPING
+        If (lAppStatus.AppStatus = APP_STATUS_STARTING) And lCurrentGlobalAppStatus = APP_STATUS_RUNNING Then lCurrentGlobalAppStatus = APP_STATUS_STARTING
+        If lAppStatus.AppStatus = APP_STATUS_STOPPING Then lCurrentGlobalAppStatus = APP_STATUS_STOPPING
+
+        lLastUpdate = Convert.ToDateTime(lAppStatus.Timestamp)
+        lElapsed = GetDBTime() - lLastUpdate
+        cSendTextElapsed.Text = lElapsed.TotalMilliseconds.ToString
+        If lElapsed.TotalMilliseconds > (gSendText_CycleInterval * 2) Then
+            lCurrentGlobalAppStatus = APP_STATUS_UNKNOWN
+            cSendTextStatus.Text = APP_STATUS_UNKNOWN
+            cSendTextStatus.BackColor = GetStatusColor(APP_STATUS_UNKNOWN).Background
+            cSendTextStatus.ForeColor = GetStatusColor(APP_STATUS_UNKNOWN).Foreground
+        End If
+
+        lAppStatus = GetAppStatus("RouteText", APP_STATUS_STARTING)
+        cRouteTextLastStarted.Text = lAppStatus.Timestamp
 
         lAppStatus = GetAppStatus("RouteText")
         cRouteTextStatus.Text = lAppStatus.AppStatus
         cRouteTextTimestamp.Text = lAppStatus.Timestamp
         cRouteTextStatus.BackColor = GetStatusColor(lAppStatus.AppStatus).Background
         cRouteTextStatus.ForeColor = GetStatusColor(lAppStatus.AppStatus).Foreground
-        If (lAppStatus.AppStatus = APP_STATUS_STARTING) And gAppStatus = APP_STATUS_RUNNING Then gAppStatus = APP_STATUS_STARTING
-        If lAppStatus.AppStatus = APP_STATUS_STOPPING Then gAppStatus = APP_STATUS_STOPPING
+        If (lAppStatus.AppStatus = APP_STATUS_STARTING) And lCurrentGlobalAppStatus = APP_STATUS_RUNNING Then lCurrentGlobalAppStatus = APP_STATUS_STARTING
+        If lAppStatus.AppStatus = APP_STATUS_STOPPING Then lCurrentGlobalAppStatus = APP_STATUS_STOPPING
 
-        DisplayAppStatus()
+        lLastUpdate = Convert.ToDateTime(lAppStatus.Timestamp)
+        lElapsed = GetDBTime() - lLastUpdate
+        cRouteTextElapsed.Text = lElapsed.TotalMilliseconds.ToString
+        If lElapsed.TotalMilliseconds > (gRouteText_CycleInterval * 2) Then
+            lCurrentGlobalAppStatus = APP_STATUS_UNKNOWN
+            cRouteTextStatus.Text = APP_STATUS_UNKNOWN
+            cRouteTextStatus.BackColor = GetStatusColor(APP_STATUS_UNKNOWN).Background
+            cRouteTextStatus.ForeColor = GetStatusColor(APP_STATUS_UNKNOWN).Foreground
+        End If
+
+        If lCurrentGlobalAppStatus <> gGlobalAppStatus Then
+
+            gGlobalAppStatus = lCurrentGlobalAppStatus
+            DisplayAppStatus()
+            WindowState = FormWindowState.Normal 'display the status if the global app status changed
+
+        End If
 
     End Sub
 
@@ -306,13 +387,15 @@ Public Class AppMonitor
 
     Sub DisplayAppStatus()
 
-        Select Case gAppStatus
+        Select Case gGlobalAppStatus
             Case APP_STATUS_RUNNING
                 NotifyIcon.Icon = New Icon(Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream("AppMonitor.Green.ico"))
             Case APP_STATUS_STARTING
                 NotifyIcon.Icon = New Icon(Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream("AppMonitor.Yellow.ico"))
             Case APP_STATUS_STOPPING
                 NotifyIcon.Icon = New Icon(Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream("AppMonitor.Red.ico"))
+            Case APP_STATUS_UNKNOWN
+                NotifyIcon.Icon = New Icon(Reflection.Assembly.GetExecutingAssembly.GetManifestResourceStream("AppMonitor.Unknown.ico"))
         End Select
 
         NotifyIcon.Visible = True
