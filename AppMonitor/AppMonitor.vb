@@ -69,6 +69,8 @@ Public Class AppMonitor
         Catch ex As Exception
 
             MessageBox.Show("GetAppStatus: " & ex.ToString, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Shutdown() ' try to shutdown gracefully
+            Application.Exit()
 
         Finally
 
@@ -190,7 +192,9 @@ Public Class AppMonitor
             lResults = lCmd.ExecuteScalar
 
         Catch ex As Exception
-            MessageBox.Show("GetDBTime: " & ex.ToString, "WARNING", MessageBoxButtons.OK, MessageBoxIcon.Warning)
+            MessageBox.Show("GetDBTime: " & ex.ToString, "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error)
+            Shutdown() ' try to shutdown gracefully
+            Application.Exit()
 
         Finally
 
